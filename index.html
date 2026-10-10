@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📓 مفكرة الروابط</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#06060d;--border:rgba(255,255,255,.09);
+    --text:#eceefb;--muted:#8b91b4;--accent:#7c5cff;--accent2:#22d3ee;
+    --danger:#ff5c7a;--success:#34d399;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Cairo',system-ui,sans-serif;color:var(--text);min-height:100vh;
+    padding:24px 16px 80px;
+    background:
+      radial-gradient(900px 600px at 15% -10%, rgba(124,92,255,.22), transparent 60%),
+      radial-gradient(800px 600px at 90% 110%, rgba(34,211,238,.15), transparent 60%),
+      var(--bg);
+    background-attachment:fixed;-webkit-font-smoothing:antialiased;
+  }
+
+  #lockScreen{
+    position:fixed;inset:0;z-index:10000;
+    background:
+      radial-gradient(900px 600px at 15% -10%, rgba(124,92,255,.35), transparent 60%),
+      radial-gradient(800px 600px at 90% 110%, rgba(34,211,238,.22), transparent 60%),
+      #050510;
+    display:grid;place-items:center;padding:20px;
+  }
+  #lockScreen.hidden{display:none;}
+
+  .lock-box{
+    width:100%;max-width:400px;
+    background:linear-gradient(160deg,#13142b,#0c0d1c);
+    border:1px solid rgba(124,92,255,.3);border-radius:26px;
+    padding:34px 26px 26px;
+    box-shadow:0 40px 100px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04),0 0 80px rgba(124,92,255,.2);
+    text-align:center;animation:lockIn .5s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes lockIn{from{opacity:0;transform:scale(.9) translateY(30px);}to{opacity:1;transform:none;}}
+
+  .lock-icon{
+    width:82px;height:82px;margin:0 auto 18px;display:grid;place-items:center;
+    border-radius:24px;font-size:2.3rem;
+    background:linear-gradient(135deg,rgba(124,92,255,.35),rgba(34,211,238,.2));
+    border:1px solid rgba(124,92,255,.4);
+    box-shadow:0 12px 40px rgba(124,92,255,.4);
+    animation:pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 12px 40px rgba(124,92,255,.4);}
+    50%{box-shadow:0 12px 60px rgba(124,92,255,.75);}
+  }
+  .lock-title{font-size:1.35rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.3px;}
+  .lock-sub{font-size:.85rem;color:var(--muted);font-weight:600;margin-bottom:24px;line-height:1.7;}
+
+  .lock-input{
+    font-family:'JetBrains Mono',monospace;font-size:1.2rem;letter-spacing:8px;
+    text-align:center;padding:16px;margin-bottom:16px;
+    background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.1);
+    color:#fff;border-radius:14px;width:100%;outline:none;transition:.22s;
+  }
+  .lock-input:focus{
+    background:rgba(0,0,0,.55);border-color:rgba(124,92,255,.7);
+    box-shadow:0 0 0 4px rgba(124,92,255,.2);
+  }
+  .lock-input::placeholder{
+    color:#3f4468;letter-spacing:normal;font-family:'Cairo',sans-serif;
+    font-weight:600;font-size:.95rem;
+  }
+
+  .lock-btn{
+    width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(135deg,#7c5cff,#22d3ee);color:#06060d;
+    font-weight:900;font-size:.95rem;padding:14px 22px;border-radius:14px;border:none;
+    cursor:pointer;font-family:inherit;transition:.22s cubic-bezier(.2,.9,.3,1.3);
+    box-shadow:0 8px 24px rgba(124,92,255,.4);
+  }
+  .lock-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 32px rgba(124,92,255,.6);}
+  .lock-btn:active{transform:scale(.97);}
+  .lock-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .lock-btn svg{width:18px;height:18px;}
+
+  .lock-error{color:#ff8fa3;font-size:.82rem;font-weight:700;margin-top:12px;min-height:20px;line-height:1.5;}
+  .lock-hint{color:#565c80;font-size:.74rem;font-weight:600;margin-top:16px;line-height:1.7;}
+  .lock-hint b{color:#a78bfa;}
+
+  #app{display:none;}
+  #app.unlocked{display:block;}
+
+  .header{max-width:900px;margin:0 auto 20px;text-align:center;}
+  .header h1{
+    font-size:clamp(1.6rem,5vw,2.3rem);font-weight:900;
+    background:linear-gradient(100deg,#c4b5fd,#a78bfa 40%,#22d3ee);
+    -webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.5px;
+  }
+  .header p{color:var(--muted);font-size:.85rem;margin-top:6px;font-weight:600;}
+
+  .top-row{
+    max-width:900px;margin:0 auto 14px;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:10px;flex-wrap:wrap;
+  }
+  .btn-tool{
+    display:inline-flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    color:#c8cce8;font-weight:700;font-size:.8rem;padding:9px 14px;
+    border-radius:12px;transition:.22s;white-space:nowrap;cursor:pointer;font-family:inherit;
+  }
+  .btn-tool:hover{background:rgba(255,255,255,.1);color:#fff;transform:translateY(-2px);}
+  .btn-tool svg{width:15px;height:15px;}
+  .btn-tool.danger{background:rgba(255,92,122,.12);border-color:rgba(255,92,122,.35);color:#ffa3b3;}
+  .btn-tool.danger:hover{background:rgba(255,92,122,.25);color:#fff;border-color:rgba(255,92,122,.65);}
+  .btn-tool.lock{background:rgba(124,92,255,.15);border-color:rgba(124,92,255,.4);color:#c4b5fd;}
+  .btn-tool.lock:hover{background:rgba(124,92,255,.3);color:#fff;border-color:rgba(124,92,255,.7);}
+  .btn-tool.key{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.35);color:#67e8f9;}
+  .btn-tool.key:hover{background:rgba(34,211,238,.25);color:#fff;border-color:rgba(34,211,238,.7);}
+
+  .add-list-bar{
+    max-width:900px;margin:0 auto 24px;display:flex;gap:10px;
+    background:rgba(255,255,255,.04);border:1px solid var(--border);
+    padding:10px;border-radius:18px;backdrop-filter:blur(14px);
+    box-shadow:0 12px 40px rgba(0,0,0,.4);flex-wrap:wrap;
+  }
+  .add-list-bar input{flex:1 1 200px;min-width:0;}
+
+  input,textarea{
+    font-family:inherit;background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.09);color:var(--text);
+    padding:12px 16px;border-radius:13px;font-size:.92rem;
+    outline:none;transition:.22s;width:100%;
+  }
+  input::placeholder,textarea::placeholder{color:#6b7093;font-weight:600;}
+  input:focus,textarea:focus{
+    background:rgba(124,92,255,.1);border-color:rgba(124,92,255,.6);
+    box-shadow:0 0 0 4px rgba(124,92,255,.15);
+  }
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  .btn-add{
+    display:inline-flex;align-items:center;gap:7px;
+    background:linear-gradient(135deg,#7c5cff,#22d3ee);color:#06060d;
+    font-weight:800;font-size:.9rem;padding:12px 22px;border-radius:13px;
+    transition:.25s cubic-bezier(.2,.9,.3,1.3);white-space:nowrap;
+    box-shadow:0 6px 18px rgba(124,92,255,.3);
+  }
+  .btn-add:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(124,92,255,.5);}
+  .btn-add:active{transform:scale(.97);}
+  .btn-add svg{width:17px;height:17px;}
+
+  #lists{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:22px;}
+
+  .notebook{
+    background:linear-gradient(160deg,#13142b,#0d0e1e);
+    border:1px solid var(--border);border-radius:24px;padding:22px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(124,92,255,.06),
+      inset 0 1px 0 rgba(255,255,255,.04);
+    animation:rise .45s cubic-bezier(.2,.9,.3,1) both;position:relative;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  .notebook::before{
+    content:'';position:absolute;top:22px;bottom:22px;right:14px;width:3px;
+    border-radius:3px;
+    background:linear-gradient(180deg,rgba(124,92,255,.4),rgba(34,211,238,.2));
+    opacity:.5;pointer-events:none;
+  }
+  .nb-head{
+    display:flex;align-items:center;gap:10px;padding-bottom:16px;
+    border-bottom:1px dashed rgba(255,255,255,.1);margin-bottom:18px;padding-right:14px;
+  }
+  .nb-emoji{font-size:1.5rem;flex:0 0 auto;filter:drop-shadow(0 4px 10px rgba(124,92,255,.5));}
+  .nb-name{
+    flex:1;min-width:0;background:transparent;border:1px solid transparent;
+    font-weight:900;font-size:1.15rem;color:var(--text);padding:8px 10px;
+    border-radius:11px;transition:.2s;
+  }
+  .nb-name:hover{background:rgba(255,255,255,.04);}
+  .nb-name:focus{background:rgba(124,92,255,.12);border-color:rgba(124,92,255,.5);box-shadow:none;}
+  .nb-count{
+    padding:6px 14px;
+    background:linear-gradient(135deg,rgba(124,92,255,.25),rgba(34,211,238,.15));
+    border:1px solid rgba(124,92,255,.4);border-radius:999px;
+    color:#c4b5fd;font-size:.8rem;font-weight:800;flex:0 0 auto;white-space:nowrap;
+  }
+  .nb-tools{display:flex;gap:5px;flex:0 0 auto;}
+  .ico-btn{
+    width:38px;height:38px;display:grid;place-items:center;border-radius:12px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+    color:#c3c7e6;transition:.2s;cursor:pointer;
+  }
+  .ico-btn svg{width:17px;height:17px;}
+  .ico-btn:hover{background:rgba(124,92,255,.25);color:#fff;border-color:rgba(124,92,255,.55);transform:translateY(-2px);}
+  .ico-btn:active{transform:scale(.92);}
+  .ico-btn.danger:hover{background:rgba(255,92,122,.22);color:#ffa3b3;border-color:rgba(255,92,122,.6);}
+  .ico-btn.gold:hover{background:rgba(34,211,238,.22);color:#67e8f9;border-color:rgba(34,211,238,.55);}
+
+  .paste-zone{position:relative;margin-bottom:16px;}
+  .paste-zone textarea{
+    font-family:'JetBrains Mono','Consolas',monospace;font-size:.86rem;line-height:1.9;
+    background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);color:#d6d9f0;
+    padding:16px 18px;border-radius:16px;width:100%;min-height:200px;resize:vertical;
+    outline:none;transition:.22s;direction:ltr;text-align:left;letter-spacing:.2px;
+  }
+  .paste-zone textarea::placeholder{color:#4d5378;font-weight:500;direction:rtl;text-align:right;}
+  .paste-zone textarea:focus{
+    background:rgba(0,0,0,.45);border-color:rgba(124,92,255,.6);
+    box-shadow:0 0 0 4px rgba(124,92,255,.15);
+  }
+  .paste-hint{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .paste-hint .hint-text{font-size:.78rem;color:var(--muted);font-weight:600;flex:1;min-width:150px;line-height:1.6;}
+  .paste-hint .hint-text b{color:#a78bfa;}
+  .paste-actions{display:flex;gap:7px;flex-wrap:wrap;}
+  .btn-save{
+    display:inline-flex;align-items:center;gap:6px;
+    background:linear-gradient(135deg,#7c5cff,#9d7bff);color:#fff;
+    font-weight:800;font-size:.85rem;padding:11px 18px;border-radius:12px;
+    transition:.22s;white-space:nowrap;box-shadow:0 4px 14px rgba(124,92,255,.3);
+  }
+  .btn-save:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(124,92,255,.5);}
+  .btn-save:active{transform:scale(.96);}
+  .btn-save svg{width:15px;height:15px;}
+  .btn-ghost{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    color:#b8bddc;font-weight:700;font-size:.82rem;padding:11px 16px;
+    border-radius:12px;transition:.2s;white-space:nowrap;
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.1);color:#fff;transform:translateY(-1px);}
+  .btn-ghost svg{width:14px;height:14px;}
+
+  .links-title{
+    display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:800;
+    color:#a8add0;margin-bottom:12px;padding-right:14px;
+  }
+  .links-title::before{
+    content:'';flex:0 0 auto;width:3px;height:14px;border-radius:3px;
+    background:linear-gradient(180deg,#7c5cff,#22d3ee);
+  }
+  .links{display:flex;flex-direction:column;gap:9px;padding-right:14px;}
+  .link-item{
+    background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);
+    border-radius:15px;padding:12px 14px;transition:.22s;
+    animation:pop .3s cubic-bezier(.2,.9,.3,1.4) both;
+  }
+  @keyframes pop{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
+  .link-item:hover{background:rgba(124,92,255,.09);border-color:rgba(124,92,255,.3);}
+  .link-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+  .link-title{flex:1;min-width:0;font-weight:800;font-size:.92rem;color:#fff;word-break:break-word;}
+  .link-actions{display:flex;gap:4px;flex:0 0 auto;}
+  .link-actions .ico-btn{width:32px;height:32px;border-radius:9px;}
+  .link-actions .ico-btn svg{width:14px;height:14px;}
+  .link-url{
+    direction:ltr;text-align:left;font-family:'JetBrains Mono','Consolas',monospace;
+    font-size:.78rem;font-weight:500;color:#8fa3d8;background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:9px 12px;
+    word-break:break-all;overflow-wrap:anywhere;line-height:1.6;cursor:pointer;
+    transition:.2s;user-select:all;letter-spacing:.2px;
+  }
+  .link-url:hover{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.3);color:#a5f3fc;}
+  .empty{
+    text-align:center;color:#565c80;font-size:.85rem;font-weight:600;
+    padding:30px 16px;border:2px dashed rgba(255,255,255,.07);border-radius:15px;line-height:1.8;
+  }
+  .empty span{font-size:1.6rem;display:block;margin-bottom:8px;opacity:.6;}
+  .welcome{
+    max-width:900px;margin:0 auto;text-align:center;padding:60px 24px;
+    background:rgba(255,255,255,.03);border:2px dashed rgba(255,255,255,.1);border-radius:24px;
+  }
+  .welcome .emoji{font-size:3.5rem;display:block;margin-bottom:14px;filter:drop-shadow(0 8px 24px rgba(124,92,255,.5));}
+  .welcome h2{font-size:1.25rem;font-weight:800;margin-bottom:10px;}
+  .welcome p{color:var(--muted);font-size:.9rem;font-weight:600;line-height:1.9;}
+  .welcome code{
+    background:rgba(124,92,255,.15);color:#c4b5fd;padding:3px 8px;border-radius:6px;
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;direction:ltr;display:inline-block;margin-top:8px;
+  }
+
+  .overlay{
+    position:fixed;inset:0;z-index:50000;background:rgba(4,4,10,.85);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    display:none;place-items:center;padding:20px;
+  }
+  .overlay.show{display:grid;}
+  .modal-box{
+    background:linear-gradient(160deg,#16172e,#0d0e1e);
+    border:1px solid rgba(124,92,255,.35);border-radius:22px;padding:26px 24px 22px;
+    max-width:440px;width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04),0 0 60px rgba(124,92,255,.15);
+    animation:boxIn .35s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .modal-box.danger{border-color:rgba(255,92,122,.4);box-shadow:0 30px 80px rgba(0,0,0,.8),0 0 60px rgba(255,92,122,.15);}
+  @keyframes boxIn{from{opacity:0;transform:scale(.9) translateY(20px);}to{opacity:1;transform:none;}}
+  .modal-icon{font-size:2.6rem;display:block;margin-bottom:12px;text-align:center;}
+  .modal-title{font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:8px;text-align:center;}
+  .modal-msg{font-size:.88rem;color:#a8add0;font-weight:600;line-height:1.7;margin-bottom:18px;text-align:center;}
+  .modal-msg b{color:#ffa3b3;font-weight:800;}
+  .modal-msg code{
+    background:rgba(124,92,255,.2);color:#c4b5fd;padding:2px 6px;border-radius:5px;
+    font-family:'JetBrains Mono',monospace;font-size:.8rem;direction:ltr;display:inline-block;
+  }
+  .modal-field{margin-bottom:12px;}
+  .modal-field label{display:block;font-size:.78rem;color:#a8add0;font-weight:700;margin-bottom:6px;}
+  .modal-field input{
+    font-family:'JetBrains Mono',monospace;letter-spacing:4px;text-align:center;font-size:1.05rem;
+  }
+  .modal-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+  .modal-btns button{
+    flex:1 1 130px;padding:13px 20px;font-size:.9rem;font-weight:800;
+    border-radius:13px;transition:.22s;font-family:inherit;cursor:pointer;
+  }
+  .btn-cancel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#c8cce8;}
+  .btn-cancel:hover{background:rgba(255,255,255,.12);color:#fff;transform:translateY(-1px);}
+  .btn-primary{
+    background:linear-gradient(135deg,#7c5cff,#22d3ee);color:#06060d;border:none;
+    box-shadow:0 6px 18px rgba(124,92,255,.4);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(124,92,255,.6);}
+  .btn-primary:active{transform:scale(.96);}
+  .btn-danger{
+    background:linear-gradient(135deg,#ff5c7a,#e11d48);color:#fff;border:none;
+    box-shadow:0 6px 18px rgba(255,92,122,.4);
+  }
+  .btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(255,92,122,.6);}
+  .btn-danger:active{transform:scale(.96);}
+  .btn-download{
+    background:linear-gradient(135deg,#34d399,#10b981);color:#052e1c;border:none;
+    box-shadow:0 6px 18px rgba(52,211,153,.4);width:100%;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-download:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(52,211,153,.6);}
+  .btn-download:active{transform:scale(.97);}
+  .btn-download svg{width:18px;height:18px;}
+  .modal-error{color:#ff8fa3;font-size:.8rem;font-weight:700;text-align:center;margin-top:8px;min-height:18px;}
+
+  .warn-box{
+    background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35);
+    border-radius:12px;padding:11px 14px;margin-bottom:14px;
+    font-size:.78rem;color:#a7f3d0;font-weight:700;line-height:1.6;
+  }
+  .warn-box b{color:#34d399;}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translate(-50%,160%);
+    background:#14142a;border:1px solid rgba(255,255,255,.14);color:#fff;
+    padding:13px 24px;border-radius:15px;font-weight:700;font-size:.88rem;
+    box-shadow:0 16px 45px rgba(0,0,0,.6);
+    transition:transform .4s cubic-bezier(.2,.9,.3,1.4),opacity .3s;
+    z-index:60000;opacity:0;pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{transform:translate(-50%,0);opacity:1;}
+  .toast.ok{border-color:rgba(52,211,153,.55);}
+  .toast.err{border-color:rgba(255,92,122,.55);}
+
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:#0b0b16;}
+  ::-webkit-scrollbar-thumb{background:linear-gradient(#7c5cff,#22d3ee);border-radius:10px;border:2px solid #0b0b16;}
+
+  @media (max-width:640px){
+    body{padding:16px 10px 70px;}
+    .notebook{padding:16px;border-radius:20px;}
+    .notebook::before{right:10px;}
+    .nb-head{padding-right:10px;gap:8px;}
+    .nb-name{font-size:1rem;padding:6px 8px;}
+    .nb-count{padding:4px 10px;font-size:.72rem;}
+    .ico-btn{width:34px;height:34px;}
+    .ico-btn svg{width:15px;height:15px;}
+    .links{padding-right:10px;}
+    .links-title{padding-right:10px;}
+    .link-item{padding:10px 12px;}
+    .link-actions .ico-btn{width:30px;height:30px;}
+    .btn-tool{font-size:.72rem;padding:8px 11px;}
+    .lock-box{padding:26px 20px 22px;}
+    .lock-icon{width:70px;height:70px;font-size:1.9rem;}
+    .modal-btns button{flex:1 1 100%;}
+  }
+</style>
+</head>
+<body>
+
+<!-- شاشة القفل -->
+<div id="lockScreen">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <h2 class="lock-title">مفكرة الروابط</h2>
+    <p class="lock-sub">ادخل كود المرور للوصول إلى مفكراتك</p>
+
+    <input type="password" class="lock-input" id="lockInput" placeholder="••••••••" autocomplete="off" maxlength="64">
+
+    <button class="lock-btn" id="lockBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="10" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      دخول
+    </button>
+
+    <div class="lock-error" id="lockError"></div>
+
+    <p class="lock-hint">💡 الكود محفوظ <b>مشفّر</b> — محدش يعرفه غيرك</p>
+  </div>
+</div>
+
+<!-- التطبيق -->
+<div id="app">
+  <div class="header">
+    <h1>📓 مفكرة الروابط</h1>
+    <p>اكتب اسم القائمة، الصق كل الروابط مرة واحدة، واحفظها كاملة</p>
+  </div>
+
+  <div class="top-row">
+    <button class="btn-tool lock" id="lockBtnTop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="10" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      قفل
+    </button>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-tool key" id="changePassBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7.5" cy="15.5" r="4"/>
+          <path d="m10.5 12.5 8-8"/>
+          <path d="m18 5 1.5 1.5"/>
+          <path d="m15 8 1.5 1.5"/>
+        </svg>
+        تغيير كود المرور
+      </button>
+
+      <button class="btn-tool danger" id="clearAllBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16"/>
+          <path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"/>
+          <path d="M6.5 7l.9 12.1A1.5 1.5 0 0 0 8.9 20.5h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/>
+        </svg>
+        مسح كل حاجة
+      </button>
+    </div>
+  </div>
+
+  <div class="add-list-bar">
+    <input type="text" id="listName" placeholder="اكتب اسم القائمة الجديدة… (مثال: قنوات beIN)" maxlength="60">
+    <button class="btn-add" id="addListBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      إنشاء القائمة
+    </button>
+  </div>
+
+  <main id="lists"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- نافذة تغيير الكود -->
+<div class="overlay" id="changePassModal">
+  <div class="modal-box">
+    <div id="changePassForm">
+      <span class="modal-icon">🔑</span>
+      <h3 class="modal-title">تغيير كود المرور</h3>
+      <p class="modal-msg">الكود الجديد هيشتغل <b>فوراً</b> على جهازك — لو عايز حد تاني يدخل بيه، حمّل الملف من الزر الأخضر اللي هيظهر</p>
+
+      <div class="modal-field">
+        <label>الكود الحالي</label>
+        <input type="password" id="oldPass" maxlength="64" autocomplete="off" placeholder="••••••••">
+      </div>
+      <div class="modal-field">
+        <label>الكود الجديد</label>
+        <input type="password" id="newPass" maxlength="64" autocomplete="off" placeholder="••••••••">
+      </div>
+      <div class="modal-field">
+        <label>تأكيد الكود الجديد</label>
+        <input type="password" id="newPass2" maxlength="64" autocomplete="off" placeholder="••••••••">
+      </div>
+
+      <div class="modal-error" id="changePassError"></div>
+
+      <div class="modal-btns">
+        <button class="btn-cancel" id="changePassCancel">إلغاء</button>
+        <button class="btn-primary" id="changePassOk">حفظ الكود</button>
+      </div>
+    </div>
+
+    <div id="changePassSuccess" style="display:none;">
+      <span class="modal-icon">✅</span>
+      <h3 class="modal-title">تم تغيير الكود بنجاح</h3>
+      <p class="modal-msg">
+        الكود الجديد <b>شغال دلوقتي فوراً</b> على جهازك.<br>
+        لو عايز تنقله لجهاز تاني، حمّل الملف الجديد.
+      </p>
+
+      <div class="warn-box">
+        💡 <b>معلومة:</b> الكود الجديد اتحفظ — هتقدر تدخل بيه عادي حتى لو قفلت الصفحة. التحميل اختياري بس لو عايز تفتح الملف على جهاز تاني.
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn-primary btn-download" id="downloadNewFileBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"/>
+            <path d="m7 10 5 5 5-5"/>
+            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+          </svg>
+          تحميل الملف الجديد (اختياري)
+        </button>
+        <button class="btn-cancel" id="changePassDone">تم، اقفل النافذة</button>
+      </div>
+
+      <p style="font-size:.75rem;color:#565c80;text-align:center;margin-top:14px;font-weight:600;line-height:1.6;">
+        💡 لو حمّلت الملف، امسم القديم واستبدله بالجديد
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة تأكيد -->
+<div class="overlay" id="confirmModal">
+  <div class="modal-box danger">
+    <span class="modal-icon" id="confirmIcon">⚠️</span>
+    <h3 class="modal-title" id="confirmTitle">تأكيد</h3>
+    <p class="modal-msg" id="confirmMsg"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="confirmCancel">إلغاء</button>
+      <button class="btn-danger" id="confirmOk">نعم</button>
+    </div>
+  </div>
+</div>
+
+<!-- كود المرور المدمج -->
+<script id="pwd-config" type="application/json">{"hash":""}</script>
+
+<script>
+/* ================================================================
+   الأيقونات
+   ================================================================ */
+const ICONS = {
+  copy:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5.5A2.5 2.5 0 0 1 7.5 3H16"/></svg>',
+  open:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14.5V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V7.5A1.5 1.5 0 0 1 5 6h4.5"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"/><path d="M6.5 7l.9 12.1A1.5 1.5 0 0 0 8.9 20.5h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10.5 11v6M13.5 11v6"/></svg>',
+  edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  save:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>',
+  x:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  copyAll:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M4 16V6.5A2.5 2.5 0 0 1 6.5 4H16"/></svg>'
+};
+
+/* ================================================================
+   إعدادات
+   ================================================================ */
+const HASH_KEY     = 'vault_hash_v5';   /* الكود الجديد بيتحفظ هنا فوراً */
+const DATA_KEY     = 'vault_data_v5';
+const DEFAULT_PASS = '1234';
+const SALT         = '::vault_salt_v5_2024::';
+const CONFIG_ID    = 'pwd-config';
+
+/* ================================================================
+   تشفير SHA-256
+   ================================================================ */
+async function hashPassword(pw){
+  const text = String(pw) + SALT;
+  try{
+    if(window.crypto && crypto.subtle && crypto.subtle.digest){
+      const buf = new TextEncoder().encode(text);
+      const h = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){}
+  let h1 = 0x811c9dc5, h2 = 0x1000193;
+  for(let i = 0; i < text.length; i++){
+    const c = text.charCodeAt(i);
+    h1 = ((h1 ^ c) * 0x01000193) >>> 0;
+    h2 = ((h2 + c) * 0x85ebca6b) >>> 0;
+  }
+  return 'fb_' + h1.toString(16) + h2.toString(16);
+}
+
+/* ================================================================
+   إدارة الكود — الأولوية: localStorage (تغيير حديث) → الملف
+   ================================================================ */
+const pwdConfigEl = document.getElementById(CONFIG_ID);
+let cachedExpectedHash = null;
+
+function readConfigHashFromFile(){
+  try{
+    const data = JSON.parse(pwdConfigEl.textContent.trim() || '{}');
+    return data.hash || '';
+  }catch(e){ return ''; }
+}
+
+function readStoredHash(){
+  try{
+    return localStorage.getItem(HASH_KEY) || '';
+  }catch(e){ return ''; }
+}
+
+function saveStoredHash(hash){
+  try{ localStorage.setItem(HASH_KEY, hash); }catch(e){}
+  /* كمان نحدّث الـ DOM عشان التحميل */
+  pwdConfigEl.textContent = JSON.stringify({hash});
+}
+
+async function getExpectedHash(){
+  if(cachedExpectedHash) return cachedExpectedHash;
+
+  /* 1. localStorage (تغيير حديث على الجهاز ده) */
+  const stored = readStoredHash();
+  if(stored){
+    cachedExpectedHash = stored;
+    return stored;
+  }
+
+  /* 2. الملف نفسه */
+  const fileHash = readConfigHashFromFile();
+  if(fileHash){
+    cachedExpectedHash = fileHash;
+    return fileHash;
+  }
+
+  /* 3. الافتراضي */
+  cachedExpectedHash = await hashPassword(DEFAULT_PASS);
+  return cachedExpectedHash;
+}
+
+async function verifyPassword(pw){
+  const expected = await getExpectedHash();
+  const actual = await hashPassword(pw);
+  return actual === expected;
+}
+
+/* ================================================================
+   الأدوات
+   ================================================================ */
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function normalizeUrl(u){
+  u = String(u).trim();
+  if(!u) return '';
+  if(/^[a-z][a-z0-9+.-]*:\/\//i.test(u)) return u;
+  if(/^\/\//.test(u)) return 'https:' + u;
+  return 'http://' + u;
+}
+
+function looksLikeUrl(s){
+  if(!s) return false;
+  const t = s.trim();
+  if(/^(https?|rtmp|rtsp|udp|ftp|mms):\/\//i.test(t)) return true;
+  if(/^\/\//.test(t)) return true;
+  if(/\.(ts|m3u8|mp4|mkv|avi|mov|webm|mp3|aac|flv|m4v)(\?|#|$)/i.test(t)) return true;
+  if(/^[\w.-]+\.[a-z]{2,}(\/|:|\?|#|$)/i.test(t) && !t.includes(' ')) return true;
+  return false;
+}
+
+function autoTitle(url){
+  try{
+    const clean = url.replace(/^[a-z]+:\/\//i,'').replace(/^www\./,'');
+    const parts = clean.split('/').filter(Boolean);
+    const last = parts[parts.length - 1] || '';
+    const filename = last.split('?')[0];
+    if(filename && filename.length < 45 && /\.\w{2,5}$/.test(filename)) return filename;
+    return parts[0] || clean;
+  }catch(e){ return url; }
+}
+
+function parseLinks(text){
+  const lines = text.split(/\r?\n/).map(l => l.trim());
+  const out = [];
+  let pendingTitle = null;
+
+  for(const line of lines){
+    if(!line) continue;
+
+    if(line.includes('|')){
+      const idx = line.indexOf('|');
+      const a = line.slice(0, idx).trim();
+      const b = line.slice(idx + 1).trim();
+      if(a && b && looksLikeUrl(b)){
+        out.push({ title: a, url: normalizeUrl(b) });
+        pendingTitle = null;
+        continue;
+      }
+    }
+
+    const m = line.match(/^(.+?)\s+(https?:\/\/\S+|\/\/\S+|\S+\.(?:ts|m3u8|mp4|mkv)(?:\?\S*)?)$/i);
+    if(m && !looksLikeUrl(m[1])){
+      out.push({ title: m[1].trim(), url: normalizeUrl(m[2]) });
+      pendingTitle = null;
+      continue;
+    }
+
+    if(looksLikeUrl(line)){
+      out.push({
+        title: pendingTitle || autoTitle(line),
+        url: normalizeUrl(line)
+      });
+      pendingTitle = null;
+    } else {
+      pendingTitle = line;
+    }
+  }
+  return out;
+}
+
+/* ================================================================
+   التنبيه
+   ================================================================ */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg, type='ok'){
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.className = 'toast ' + type; }, 2600);
+}
+
+/* ================================================================
+   البيانات
+   ================================================================ */
+let state = { lists: [] };
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(DATA_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d && Array.isArray(d.lists)){
+        d.lists.forEach(l => {
+          if(!Array.isArray(l.items)) l.items = [];
+          l.items.forEach(it => {
+            if(!it.id) it.id = uid();
+            if(!it.createdAt) it.createdAt = 0;
+          });
+        });
+        return d;
+      }
+    }
+  }catch(e){}
+  return { lists: [] };
+}
+
+let persistTimer;
+function persist(){
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    try{ localStorage.setItem(DATA_KEY, JSON.stringify(state)); }catch(e){}
+  }, 120);
+}
+function persistNow(){
+  clearTimeout(persistTimer);
+  try{ localStorage.setItem(DATA_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* ================================================================
+   تأكيد
+   ================================================================ */
+const confirmModal = document.getElementById('confirmModal');
+const confirmIcon = document.getElementById('confirmIcon');
+const confirmTitle = document.getElementById('confirmTitle');
+const confirmMsg = document.getElementById('confirmMsg');
+const confirmOk = document.getElementById('confirmOk');
+const confirmCancel = document.getElementById('confirmCancel');
+let confirmCallback = null;
+
+function askConfirm(opts){
+  confirmIcon.textContent = opts.icon || '⚠️';
+  confirmTitle.textContent = opts.title || 'تأكيد';
+  confirmMsg.innerHTML = opts.msg || '';
+  confirmOk.textContent = opts.okText || 'نعم';
+  confirmCallback = opts.onOk || null;
+  confirmModal.classList.add('show');
+}
+function closeConfirm(){
+  confirmModal.classList.remove('show');
+  confirmCallback = null;
+}
+confirmCancel.addEventListener('click', closeConfirm);
+confirmModal.addEventListener('click', e => { if(e.target === confirmModal) closeConfirm(); });
+confirmOk.addEventListener('click', () => {
+  const cb = confirmCallback;
+  closeConfirm();
+  if(typeof cb === 'function') cb();
+});
+
+/* ================================================================
+   النسخ
+   ================================================================ */
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    let ok = false;
+    try{ ok = document.execCommand('copy'); }catch(_){}
+    document.body.removeChild(ta);
+    return ok;
+  }
+}
+
+/* ================================================================
+   شاشة القفل
+   ================================================================ */
+const lockScreen = document.getElementById('lockScreen');
+const lockInput  = document.getElementById('lockInput');
+const lockBtn    = document.getElementById('lockBtn');
+const lockError  = document.getElementById('lockError');
+const app        = document.getElementById('app');
+
+function openApp(){
+  lockScreen.classList.add('hidden');
+  app.classList.add('unlocked');
+  state = loadData();
+  render();
+}
+
+function lockApp(){
+  app.classList.remove('unlocked');
+  lockScreen.classList.remove('hidden');
+  lockInput.value = '';
+  lockError.textContent = '';
+  setTimeout(() => lockInput.focus(), 150);
+}
+
+async function handleLogin(){
+  lockError.textContent = '';
+  const pw = lockInput.value.trim();
+
+  if(!pw){
+    lockError.textContent = 'اكتب الكود أولاً';
+    lockInput.focus();
+    return;
+  }
+
+  lockBtn.disabled = true;
+  const ok = await verifyPassword(pw);
+  lockBtn.disabled = false;
+
+  if(ok){
+    toast('أهلاً بيك 👋');
+    openApp();
+  } else {
+    lockError.textContent = '❌ الكود غلط — حاول تاني';
+    lockInput.value = '';
+    lockInput.focus();
+    lockScreen.querySelector('.lock-box').animate(
+      [{transform:'translateX(-8px)'},{transform:'translateX(8px)'},
+       {transform:'translateX(-5px)'},{transform:'translateX(5px)'},
+       {transform:'translateX(0)'}],
+      {duration:350}
+    );
+  }
+}
+
+lockBtn.addEventListener('click', handleLogin);
+lockInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); lockBtn.click(); }
+});
+
+/* ================================================================
+   نافذة تغيير الكود
+   ================================================================ */
+const changePassModal  = document.getElementById('changePassModal');
+const changePassForm   = document.getElementById('changePassForm');
+const changePassSuccess= document.getElementById('changePassSuccess');
+const oldPassInput     = document.getElementById('oldPass');
+const newPassInput     = document.getElementById('newPass');
+const newPass2Input    = document.getElementById('newPass2');
+const changePassError  = document.getElementById('changePassError');
+const changePassCancel = document.getElementById('changePassCancel');
+const changePassOk     = document.getElementById('changePassOk');
+
+let pendingNewHash = null;
+
+function openChangePass(){
+  changePassForm.style.display = '';
+  changePassSuccess.style.display = 'none';
+  oldPassInput.value = '';
+  newPassInput.value = '';
+  newPass2Input.value = '';
+  changePassError.textContent = '';
+  pendingNewHash = null;
+  changePassModal.classList.add('show');
+  setTimeout(() => oldPassInput.focus(), 100);
+}
+function closeChangePass(){
+  changePassModal.classList.remove('show');
+}
+
+document.getElementById('changePassBtn').addEventListener('click', openChangePass);
+changePassCancel.addEventListener('click', closeChangePass);
+changePassModal.addEventListener('click', e => { if(e.target === changePassModal) closeChangePass(); });
+
+changePassOk.addEventListener('click', async () => {
+  changePassError.textContent = '';
+
+  const oldPw  = oldPassInput.value.trim();
+  const newPw  = newPassInput.value.trim();
+  const newPw2 = newPass2Input.value.trim();
+
+  if(!oldPw){ changePassError.textContent = 'اكتب الكود الحالي'; oldPassInput.focus(); return; }
+  if(!newPw){ changePassError.textContent = 'اكتب الكود الجديد'; newPassInput.focus(); return; }
+  if(newPw.length < 3){ changePassError.textContent = 'الكود الجديد لازم 3 حروف على الأقل'; newPassInput.focus(); return; }
+  if(newPw !== newPw2){ changePassError.textContent = 'الكودين الجديدين مش متطابقين'; newPass2Input.focus(); return; }
+
+  const ok = await verifyPassword(oldPw);
+  if(!ok){
+    changePassError.textContent = '❌ الكود الحالي غلط';
+    oldPassInput.value = '';
+    oldPassInput.focus();
+    return;
+  }
+
+  /* احسب الهاش الجديد */
+  const newHash = await hashPassword(newPw);
+  pendingNewHash = newHash;
+
+  /* ✨ الأهم: احفظ الكود الجديد في localStorage + الملف */
+  cachedExpectedHash = newHash;
+  saveStoredHash(newHash);  /* localStorage + DOM */
+
+  /* اعرض شاشة النجاح */
+  changePassForm.style.display = 'none';
+  changePassSuccess.style.display = '';
+
+  toast('✅ الكود الجديد شغال دلوقتي فوراً');
+});
+
+/* زر التحميل (اختياري) */
+document.getElementById('downloadNewFileBtn').addEventListener('click', () => {
+  if(!pendingNewHash){
+    toast('مفيش تغييرات للتحميل', 'err');
+    return;
+  }
+  downloadUpdatedFile(pendingNewHash);
+});
+
+document.getElementById('changePassDone').addEventListener('click', () => {
+  closeChangePass();
+});
+
+/* ================================================================
+   تحميل الملف الجديد
+   ================================================================ */
+function downloadUpdatedFile(newHash){
+  const clone = document.documentElement.cloneNode(true);
+
+  /* حدّث الهاش في النسخة */
+  const cfg = clone.querySelector('#' + CONFIG_ID);
+  if(cfg) cfg.textContent = JSON.stringify({hash: newHash});
+
+  /* رجّع الواجهة لحالتها الأصلية */
+  const lockInClone = clone.querySelector('#lockScreen');
+  if(lockInClone) lockInClone.classList.remove('hidden');
+
+  const appInClone = clone.querySelector('#app');
+  if(appInClone) appInClone.classList.remove('unlocked');
+
+  const listsInClone = clone.querySelector('#lists');
+  if(listsInClone) listsInClone.innerHTML = '';
+
+  /* اقفل النوافذ */
+  clone.querySelectorAll('.overlay').forEach(el => el.classList.remove('show'));
+
+  /* نظّف الحقول */
+  const cleanSelectors = ['.lock-input', '.nb-name', '.paste-input', '#listName', '#oldPass', '#newPass', '#newPass2'];
+  cleanSelectors.forEach(sel => {
+    clone.querySelectorAll(sel).forEach(inp => {
+      if(inp.tagName === 'INPUT' || inp.tagName === 'TEXTAREA') inp.value = '';
+    });
+  });
+
+  /* رجّع تبويبات نافذة التغيير */
+  const formInClone = clone.querySelector('#changePassForm');
+  const successInClone = clone.querySelector('#changePassSuccess');
+  if(formInClone) formInClone.style.display = '';
+  if(successInClone) successInClone.style.display = 'none';
+
+  /* ابنِ الملف */
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+
+  /* حمّله */
+  const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'mofakraty.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  toast('✅ تم تحميل الملف — استبدل القديم بالجديد');
+}
+
+/* ================================================================
+   زر القفل
+   ================================================================ */
+document.getElementById('lockBtnTop').addEventListener('click', () => {
+  askConfirm({
+    icon: '🔒',
+    title: 'قفل الموقع',
+    msg: 'هتحتاج تدخل الكود تاني عشان توصل لمفكراتك.',
+    okText: 'نعم، اقفل',
+    onOk: () => {
+      lockApp();
+      toast('تم القفل 🔒');
+    }
+  });
+});
+
+/* ================================================================
+   العرض
+   ================================================================ */
+const listsEl = document.getElementById('lists');
+
+function render(){
+  listsEl.innerHTML = '';
+
+  if(!state.lists.length){
+    listsEl.innerHTML = `
+      <div class="welcome">
+        <span class="emoji">📓</span>
+        <h2>ابدأ بإنشاء أول مفكرة</h2>
+        <p>
+          اكتب اسم القائمة في الأعلى واضغط «إنشاء القائمة».<br>
+          بعدها هتلاقي مفكرة كبيرة تقدر تلصق فيها الروابط كلها مرة واحدة:<br>
+          <code>اسم القناة<br>http://example.com/link.ts</code>
+        </p>
+      </div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  state.lists.forEach(list => frag.appendChild(buildNotebook(list)));
+  listsEl.appendChild(frag);
+}
+
+function buildNotebook(list){
+  const nb = document.createElement('section');
+  nb.className = 'notebook';
+  nb.dataset.listId = list.id;
+
+  nb.innerHTML = `
+    <div class="nb-head">
+      <span class="nb-emoji">📓</span>
+      <input class="nb-name" maxlength="60" value="${esc(list.name)}" placeholder="اسم القائمة">
+      <span class="nb-count">${list.items.length} رابط</span>
+      <div class="nb-tools">
+        <button class="ico-btn gold" data-act="copy-all" title="نسخ كل الروابط">${ICONS.copyAll}</button>
+        <button class="ico-btn danger" data-act="delete-list" title="مسح القائمة">${ICONS.trash}</button>
+      </div>
+    </div>
+
+    <div class="paste-zone">
+      <textarea class="paste-input" placeholder="الصق هنا كل الروابط مرة واحدة…
+
+beIN sport 1
+http://mag.tiger-ott.net/live/.../1030236.ts
+
+beIN sport 2
+http://mag.tiger-ott.net/live/.../1030237.ts"></textarea>
+      <div class="paste-hint">
+        <span class="hint-text">💡 الصق القائمة كاملة — النظام هيقرأ الأسماء والروابط ويحفظها تلقائياً</span>
+        <div class="paste-actions">
+          <button class="btn-ghost" data-act="clear-paste">${ICONS.x} مسح</button>
+          <button class="btn-save" data-act="save-paste">${ICONS.save} حفظ الروابط</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="links-title">الروابط المحفوظة</div>
+    <div class="links"></div>
+  `;
+
+  fillLinks(list, nb);
+
+  const nameInput = nb.querySelector('.nb-name');
+  nameInput.addEventListener('input', () => {
+    list.name = nameInput.value;
+    persist();
+  });
+  nameInput.addEventListener('blur', () => {
+    if(!nameInput.value.trim()){
+      nameInput.value = 'قائمة بدون اسم';
+      list.name = nameInput.value;
+      persist();
+    }
+  });
+
+  return nb;
+}
+
+function fillLinks(list, nb){
+  const box = nb.querySelector('.links');
+  const countEl = nb.querySelector('.nb-count');
+  countEl.textContent = list.items.length + ' رابط';
+  box.innerHTML = '';
+
+  if(!list.items.length){
+    box.innerHTML = `<div class="empty"><span>📝</span>المفكرة فاضية — الصق روابطك فوق واضغط «حفظ الروابط»</div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  list.items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'link-item';
+    row.dataset.itemId = item.id;
+    row.innerHTML = `
+      <div class="link-head">
+        <div class="link-title">${esc(item.title)}</div>
+        <div class="link-actions">
+          <button class="ico-btn" data-act="open" title="فتح">${ICONS.open}</button>
+          <button class="ico-btn" data-act="copy" title="نسخ">${ICONS.copy}</button>
+          <button class="ico-btn" data-act="edit" title="تعديل">${ICONS.edit}</button>
+          <button class="ico-btn danger" data-act="del" title="حذف">${ICONS.trash}</button>
+        </div>
+      </div>
+      <div class="link-url" data-act="copy" title="اضغط للنسخ">${esc(item.url)}</div>
+    `;
+    frag.appendChild(row);
+  });
+  box.appendChild(frag);
+}
+
+/* ================================================================
+   أحداث القوائم
+   ================================================================ */
+listsEl.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-act]');
+  if(!btn) return;
+
+  const nb = btn.closest('.notebook');
+  if(!nb) return;
+
+  const listId = nb.dataset.listId;
+  const list = state.lists.find(l => l.id === listId);
+  if(!list) return;
+
+  const act = btn.dataset.act;
+
+  if(act === 'delete-list'){
+    askConfirm({
+      icon: '🗑️',
+      title: 'مسح القائمة بالكامل',
+      msg: `هتمسح مفكرة <b>«${esc(list.name)}»</b> وكل روابطها (${list.items.length} رابط).<br><br>مش هتقدر ترجعها تاني.`,
+      okText: 'نعم، امسح',
+      onOk: () => {
+        state.lists = state.lists.filter(l => l.id !== listId);
+        persistNow();
+        render();
+        toast('تم مسح القائمة 🗑️');
+      }
+    });
+    return;
+  }
+
+  if(act === 'copy-all'){
+    if(!list.items.length){ toast('لا توجد روابط للنسخ 🫙', 'err'); return; }
+    const text = list.items.map(i => i.title + '\n' + i.url).join('\n\n');
+    (await copyText(text))
+      ? toast(`تم نسخ ${list.items.length} رابط كامل ⧉`)
+      : toast('تعذر النسخ', 'err');
+    return;
+  }
+
+  if(act === 'clear-paste'){
+    nb.querySelector('.paste-input').value = '';
+    nb.querySelector('.paste-input').focus();
+    return;
+  }
+
+  if(act === 'save-paste'){ savePaste(list, nb); return; }
+
+  const row = btn.closest('.link-item');
+  if(!row) return;
+  const itemId = row.dataset.itemId;
+  const item = list.items.find(i => i.id === itemId);
+  if(!item) return;
+
+  if(act === 'copy'){
+    (await copyText(item.url)) ? toast('تم نسخ الرابط كامل ⧉') : toast('تعذر النسخ', 'err');
+  }
+  else if(act === 'open'){
+    window.open(item.url, '_blank', 'noopener,noreferrer');
+  }
+  else if(act === 'edit'){
+    const newTitle = prompt('اسم الرابط:', item.title);
+    if(newTitle === null) return;
+    const newUrl = prompt('الرابط:', item.url);
+    if(newUrl === null) return;
+    const trimmed = newUrl.trim();
+    if(!trimmed){ toast('الرابط لا يمكن أن يكون فارغاً', 'err'); return; }
+    item.title = newTitle.trim() || item.title;
+    item.url = normalizeUrl(trimmed);
+    persistNow();
+    fillLinks(list, nb);
+    toast('تم التعديل ✏️');
+  }
+  else if(act === 'del'){
+    list.items = list.items.filter(i => i.id !== itemId);
+    persistNow();
+    fillLinks(list, nb);
+    toast('تم حذف الرابط 🗑️');
+  }
+});
+
+function savePaste(list, nb){
+  const ta = nb.querySelector('.paste-input');
+  const text = ta.value;
+
+  if(!text.trim()){ toast('الصق الروابط أولاً 📝', 'err'); ta.focus(); return; }
+
+  const parsed = parseLinks(text);
+  if(!parsed.length){ toast('لم يتم التعرف على أي رابط — تحقق من الصيغة', 'err'); ta.focus(); return; }
+
+  let added = 0, dupes = 0;
+  const now = Date.now();
+
+  parsed.forEach((it, i) => {
+    if(list.items.some(existing => existing.url === it.url)){ dupes++; return; }
+    list.items.push({
+      id: uid(),
+      title: it.title || autoTitle(it.url),
+      url: it.url,
+      createdAt: now + i
+    });
+    added++;
+  });
+
+  persistNow();
+  fillLinks(list, nb);
+  ta.value = '';
+
+  let msg = `تم حفظ ${added} رابط كامل ✅`;
+  if(dupes) msg += ` (تجاهلنا ${dupes} مكرر)`;
+  toast(msg);
+}
+
+/* ================================================================
+   إنشاء قائمة
+   ================================================================ */
+const listNameInput = document.getElementById('listName');
+
+function createList(){
+  const name = listNameInput.value.trim();
+  if(!name){ toast('اكتب اسم القائمة أولاً ✍️', 'err'); listNameInput.focus(); return; }
+
+  const newList = { id: uid(), name, items: [] };
+  state.lists.unshift(newList);
+  persistNow();
+  listNameInput.value = '';
+  render();
+  toast('تم إنشاء المفكرة ✨');
+
+  setTimeout(() => {
+    const nb = listsEl.querySelector(`[data-list-id="${newList.id}"]`);
+    if(nb){
+      nb.scrollIntoView({ behavior:'smooth', block:'center' });
+      const ta = nb.querySelector('.paste-input');
+      if(ta) ta.focus();
+    }
+  }, 150);
+}
+
+document.getElementById('addListBtn').addEventListener('click', createList);
+listNameInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); createList(); }
+});
+
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+  if(!state.lists.length){ toast('مفيش حاجة عشان تمسحها 🫙', 'err'); return; }
+  const totalLinks = state.lists.reduce((s,l) => s + l.items.length, 0);
+  askConfirm({
+    icon: '💣',
+    title: 'مسح كل حاجة',
+    msg: `هتمسح <b>${state.lists.length} قائمة</b> و <b>${totalLinks} رابط</b>.<br><br>كل حاجة هتختفي نهائياً.`,
+    okText: 'نعم، امسح الكل',
+    onOk: () => {
+      state.lists = [];
+      persistNow();
+      render();
+      toast('تم مسح كل حاجة 🗑️');
+    }
+  });
+});
+
+listsEl.addEventListener('keydown', (e) => {
+  if(!e.target.classList.contains('paste-input')) return;
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+    e.preventDefault();
+    const nb = e.target.closest('.notebook');
+    const list = state.lists.find(l => l.id === nb.dataset.listId);
+    if(list) savePaste(list, nb);
+  }
+});
+
+/* ================================================================
+   بدء التشغيل
+   ================================================================ */
+(function init(){
+  lockScreen.classList.remove('hidden');
+  setTimeout(() => lockInput.focus(), 200);
+})();
+</script>
+</body>
+</html>
